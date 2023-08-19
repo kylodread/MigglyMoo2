@@ -34,7 +34,9 @@ class _AboutState extends State<About> with SingleTickerProviderStateMixin {
         backgroundColor: Colors.white,
         title: const Text(
           'About',
-          style: TextStyle(color: Color(0xFF222831)),
+          style: TextStyle(
+            color: Color(0xFF222831),
+            fontFamily: 'SilkScreen'),
         ),
         centerTitle: true,
         leading: IconButton(

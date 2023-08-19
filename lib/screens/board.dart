@@ -44,7 +44,6 @@ Map<Tetromino, Color> tetrominoColors = {
   Tetromino.Z: Colors.red,
 };
 
-
 class _GameBoardState extends State<GameBoard> {
   SwipeDirection swipeDirection = SwipeDirection.none;
   final player = AudioPlayer();
@@ -57,16 +56,16 @@ class _GameBoardState extends State<GameBoard> {
   int linesCleared = 0; // Track the number of lines cleared
   int linesClearedHighScore = 0; // Add this line to define the variable
 
-  static const Duration fastDropDelay = Duration(milliseconds: 50); // Set the time delay for fast drop
+  static const Duration fastDropDelay =
+      Duration(milliseconds: 50); // Set the time delay for fast drop
 
+  @override
+  void dispose() {
+    timer?.cancel();
+    player.dispose(); // Dispose the audio player to release resources
 
-@override
-void dispose() {
-  timer?.cancel();
-  player.dispose(); // Dispose the audio player to release resources
-
-  super.dispose();
-}
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -83,28 +82,27 @@ void dispose() {
   }
 
   void gameLoop(Duration frameRate) {
-  timer = Timer.periodic(frameRate, (timer) {
-    if (!isPaused && mounted) {
-      setState(() {
-        clearLines();
-        checkLanding();
+    timer = Timer.periodic(frameRate, (timer) {
+      if (!isPaused && mounted) {
+        setState(() {
+          clearLines();
+          checkLanding();
 
-        if (gameOver) {
-          timer.cancel();
-          resetGame();
-          player.play(AssetSource('tetris_gameOver.wav'));
-          Navigator.pushReplacementNamed(
-            context,
-            Score.id,
-            arguments: currentScore,
-          );
-        }
-        currentPiece.movePiece(Direction.down);
-      });
-    }
-  });
-}
-
+          if (gameOver) {
+            timer.cancel();
+            resetGame();
+            player.play(AssetSource('tetris_gameOver.wav'));
+            Navigator.pushReplacementNamed(
+              context,
+              Score.id,
+              arguments: currentScore,
+            );
+          }
+          currentPiece.movePiece(Direction.down);
+        });
+      }
+    });
+  }
 
   void togglePause() {
     setState(() {
@@ -122,7 +120,8 @@ void dispose() {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Game Over'),
-        content: Text("Your score is: $currentScore\nLines cleared: $linesCleared"), // Display lines cleared in the dialog
+        content: Text(
+            "Your score is: $currentScore\nLines cleared: $linesCleared"), // Display lines cleared in the dialog
         actions: [
           TextButton(
             onPressed: () {
@@ -136,26 +135,38 @@ void dispose() {
     );
 
     // Update the high score if needed
-  if (currentScore > highScore) {
-    setState(() {
-      highScore = currentScore;
-    });
+    if (currentScore > highScore) {
+      setState(() {
+        highScore = currentScore;
+      });
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setInt('highScore', highScore);
+    }
+
+    // Save the lines cleared high score
     final prefs = await SharedPreferences.getInstance();
-    prefs.setInt('highScore', highScore);
+    prefs.setInt('linesClearedHighScore', linesClearedHighScore);
+
+    // ignore: use_build_context_synchronously
+    Navigator.pushReplacementNamed(
+      context,
+      Score.id,
+      arguments: {
+        'userScore': currentScore,
+        'highScore': highScore,
+        'linesScleared': linesCleared,
+        'linesClearedHighScore': linesClearedHighScore,
+      },
+    );
   }
 
-  // Save the lines cleared high score
-  final prefs = await SharedPreferences.getInstance();
-  prefs.setInt('linesClearedHighScore', linesClearedHighScore);
-}
-
-Future<void> loadHighScores() async {
-  final prefs = await SharedPreferences.getInstance();
-  setState(() {
-    highScore = prefs.getInt('highScore') ?? 0;
-    linesClearedHighScore = prefs.getInt('linesClearedHighScore') ?? 0;
-  });
-}
+  Future<void> loadHighScores() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      highScore = prefs.getInt('highScore') ?? 0;
+      linesClearedHighScore = prefs.getInt('linesClearedHighScore') ?? 0;
+    });
+  }
 
   void resetGame() {
     gameBoard = List.generate(
@@ -304,304 +315,211 @@ Future<void> loadHighScores() async {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: GestureDetector(
-          onHorizontalDragUpdate: (details) {
-            if (details.delta.dx > 0) {
-              onSwipeRight();
-            } else {
-              onSwipeLeft();
-            }
-          },
-          onVerticalDragUpdate: (details) {
-            if (details.delta.dy > 0) {
-              onSwipeDown();
-            } else {
-              onSwipeUp();
-            }
-          },
-          onHorizontalDragEnd: (_) {
-            resetSwipe();
-          },
-          onVerticalDragEnd: (_) {
-            resetSwipe();
-          },
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Score bubble
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        children: [
-                          const Text(
-                            'Score',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                              fontFamily: 'Silkscreen',
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            currentScore.toString(),
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontFamily: 'Silkscreen',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // High Score bubble
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        children: [
-                          const Text(
-                            'High Score',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                              fontFamily: 'Silkscreen',
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            highScore.toString(),
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontFamily: 'Silkscreen',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Line Tracker bubble
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Lines:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'Silkscreen',
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        linesCleared.toString(),
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontFamily: 'Silkscreen',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Expanded(
-                flex: 5,
-                child: Container(
-                  margin: const EdgeInsets.only(
-                      top: 0, right: 40, left: 40, bottom: 8),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF222831),
-                    borderRadius: BorderRadius.all(Radius.circular(30)),
-                  ),
-                  child: Material(
-                    elevation: 10,
-                    borderRadius: const BorderRadius.all(Radius.circular(30)),
-                    color: Colors.transparent,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 31, left: 10, right: 10, bottom: 31),
-                      child: Material(
-                        elevation: 5,
-                        color: Colors.transparent,
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            border: Border.symmetric(
-                              horizontal: BorderSide(
-                                width: 1.0,
-                                color: Color(0xFF393E46),
-                              ),
-                            ),
-                          ),
-                          child: GridView.builder(
-                              itemCount: rowLength * colLength,
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: rowLength),
-                              itemBuilder: (context, index) {
-                                int row = (index / rowLength).floor();
-                                int col = (index % rowLength);
-
-                                if (currentPiece.position.contains(index)) {
-                                  return Pixel(
-                                    colour: tetrominoColors[currentPiece.type] ??
-                                        Colors.white,
-                                    childWidget: index,
-                                  );
-                                } else if (gameBoard[row][col] != null) {
-                                  final Tetromino? tetrominoType =
-                                      gameBoard[row][col];
-                                  return Pixel(
-                                      colour: tetrominoColors[tetrominoType] ??
-                                          Colors.white,
-                                      childWidget: index);
-                                } else {
-                                  return Pixel(
-                                      colour: Colors.transparent,
-                                      childWidget: index);
-                                }
-                              }),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 50, right: 50, bottom: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            style: kMovingButtonStyle.copyWith(
-                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                            ),
-                            onPressed: moveDown,
-                            child: const Icon(
-                              Icons.keyboard_arrow_down,
-                              size: 30,
-                            ),
-                          ),
-                        ],
-                      ),
-                          ElevatedButton(
-                            style: kMovingButtonStyle.copyWith(
-                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(20),
-                                    bottomLeft: Radius.circular(20),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            onPressed: moveLeft,
-                            child: const Icon(
-                              Icons.arrow_back_ios,
-                            ),
-                          ),
-                          ElevatedButton(
-                            style: kMovingButtonStyle.copyWith(
-                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(20),
-                                    bottomRight: Radius.circular(20),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            onPressed: moveRight,
-                            child: const Icon(
-                              Icons.arrow_forward_ios,
-                            ),
-                          ),
-                          
-                      ElevatedButton(
-                        style: kMovingButtonStyle.copyWith(
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                             RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                        ),
-                        onPressed: rotatePiece,
-                        child: const Icon(
-                          Icons.rotate_right,
-                          size: 30,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
-      ),     
-      appBar: AppBar(
-        title: Text(isPaused ? "Paused" : "MigglyMoo 2"),
-        titleTextStyle: const TextStyle(
-          fontFamily: 'Silkscreen',
-           fontSize: 20,
-         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                  ),
-              onPressed: togglePause,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  isPaused ? "Play" : "Pause",
-                  style: const TextStyle(
-                    fontSize: 16,
-                     fontFamily: 'Silkscreen',
-                   ),
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      children: [
+                        const Text(
+                          'Score / HS',
+                          style: TextStyle(
+                            fontSize: 14, // Smaller font size
+                            color: Colors.white,
+                            fontFamily: 'Silkscreen',
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '$currentScore / $highScore',
+                          style: const TextStyle(
+                            fontSize: 18, // Smaller font size
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontFamily: 'Silkscreen',
+                          ),
+                        ),
+                      ],
+                    ),
+                    FloatingActionButton(
+                      onPressed: togglePause,
+                      child: Icon(isPaused ? Icons.play_arrow : Icons.pause),
+                    ),
+                    Column(
+                      children: [
+                        const Text(
+                          'Lines / HS',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                            fontFamily: 'Silkscreen',
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '$linesCleared / $linesClearedHighScore',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontFamily: 'Silkscreen',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            Expanded(
+              flex: 5,
+              child: Container(
+                margin: const EdgeInsets.only(
+                    top: 0, right: 40, left: 40, bottom: 8),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF222831),
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                ),
+                child: Material(
+                  elevation: 10,
+                  borderRadius: const BorderRadius.all(Radius.circular(30)),
+                  color: Colors.transparent,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        top: 31, left: 10, right: 10, bottom: 31),
+                    child: Material(
+                      elevation: 5,
+                      color: Colors.transparent,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          border: Border.symmetric(
+                            horizontal: BorderSide(
+                              width: 1.0,
+                              color: Color(0xFF393E46),
+                            ),
+                          ),
+                        ),
+                        child: GridView.builder(
+                            itemCount: rowLength * colLength,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: rowLength),
+                            itemBuilder: (context, index) {
+                              int row = (index / rowLength).floor();
+                              int col = (index % rowLength);
+
+                              if (currentPiece.position.contains(index)) {
+                                return Pixel(
+                                  colour: tetrominoColors[currentPiece.type] ??
+                                      Colors.white,
+                                  childWidget: index,
+                                );
+                              } else if (gameBoard[row][col] != null) {
+                                final Tetromino? tetrominoType =
+                                    gameBoard[row][col];
+                                return Pixel(
+                                    colour: tetrominoColors[tetrominoType] ??
+                                        Colors.white,
+                                    childWidget: index);
+                              } else {
+                                return Pixel(
+                                    colour: Colors.transparent,
+                                    childWidget: index);
+                              }
+                            }),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 50, right: 50, bottom: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      style: kMovingButtonStyle.copyWith(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                      onPressed: moveDown,
+                      child: const Icon(
+                        Icons.keyboard_arrow_down,
+                        size: 30,
+                      ),
+                    ),
+                    ElevatedButton(
+                      style: kMovingButtonStyle.copyWith(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              bottomLeft: Radius.circular(20),
+                            ),
+                          ),
+                        ),
+                      ),
+                      onPressed: moveLeft,
+                      child: const Icon(
+                        Icons.arrow_back_ios,
+                      ),
+                    ),
+                    ElevatedButton(
+                      style: kMovingButtonStyle.copyWith(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(20),
+                              bottomRight: Radius.circular(20),
+                            ),
+                          ),
+                        ),
+                      ),
+                      onPressed: moveRight,
+                      child: const Icon(
+                        Icons.arrow_forward_ios,
+                      ),
+                    ),
+                    ElevatedButton(
+                      style: kMovingButtonStyle.copyWith(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                      onPressed: rotatePiece,
+                      child: const Icon(
+                        Icons.rotate_right,
+                        size: 30,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -34,6 +34,7 @@ final kMovingButtonStyle = ButtonStyle(
 //score screen
 const kScoreScreenDisplayTextStyle = TextStyle(
   fontSize: 45,
+  fontFamily: 'SilkScreen',
   color: Color(0xFF36FE63),
   fontWeight: FontWeight.w600,
 );

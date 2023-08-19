@@ -3,6 +3,7 @@ import 'package:tetris/constants.dart';
 import 'package:tetris/screens/board.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'about.dart';
+import 'settings.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = "home_screen";
@@ -30,6 +31,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void openSettings() {
+    Navigator.pushNamed(context, SettingsScreen.id);
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -43,31 +48,48 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
           child: Stack(
         children: [
-          //the music button
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: toggleMusic,
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          20.0), // Set the border radius here
-                    ),
+          Positioned(
+            top: 20, // Adjust this value to position the button as desired
+            right: 20, // Adjust this value to position the button as desired
+            child: TextButton(
+              onPressed: toggleMusic,
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
                   ),
                 ),
-                child: isMusicOn
-                    ? const Icon(
-                        Icons.music_note_sharp,
-                        color: Colors.black87,
-                      )
-                    : const Icon(
-                        Icons.music_off,
-                        color: Colors.black87,
-                      ),
               ),
-            ],
+              child: isMusicOn
+                  ? const Icon(
+                      Icons.music_note_sharp,
+                      color: Colors.black87,
+                    )
+                  : const Icon(
+                      Icons.music_off,
+                      color: Colors.black87,
+                    ),
+            ),
+          ),
+
+          // Settings Button
+          Positioned(
+            top: 20, // Adjust this value to position the button as desired
+            left: 20, // Adjust this value to position the button as desired
+            child: TextButton(
+              onPressed: openSettings,
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                ),
+              ),
+              child: const Icon(
+                Icons.settings,
+                color: Colors.black87,
+              ),
+            ),
           ),
           //ui of the whole app
           Center(
@@ -100,10 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                   child: const Text(
                     'PLAY',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontFamily: 'Silkscreen'
-                    ),
+                    style: TextStyle(fontSize: 18, fontFamily: 'Silkscreen'),
                   ),
                 ),
                 const SizedBox(
@@ -116,10 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                   child: const Text(
                     'ABOUT',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontFamily: 'Silkscreen'
-                    ),
+                    style: TextStyle(fontSize: 18, fontFamily: 'Silkscreen'),
                   ),
                 ),
               ],
