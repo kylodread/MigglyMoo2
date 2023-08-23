@@ -3,7 +3,7 @@ import 'package:tetris/constants.dart';
 import 'package:tetris/screens/board.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'about.dart';
-import 'settings.dart';
+import 'package:tetris/screens/settings.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = "home_screen";

@@ -1,26 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'screens/board.dart';
-import 'screens/home.dart';
-import 'screens/score.dart'; // Import the updated ScoreScreen class
-import 'screens/about.dart';
 import 'screens/splash.dart';
+import 'screens/home.dart';
+import 'screens/about.dart';
+import 'screens/board.dart';
+import 'screens/score.dart';
 import 'screens/settings.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
-  runApp(const MyApp());
+    const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // Define your variables here
-  final int userScore = 0; // Provide default values or update with appropriate values
-  final int highScore = 0;
-  final int linesCleared = 0;
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -32,13 +26,12 @@ class MyApp extends StatelessWidget {
         About.id: (context) => const About(),
         GameBoard.id: (context) => const GameBoard(),
         ScoreScreen.id: (context) => ScoreScreen(
-          userScore: userScore,
-          highScore: highScore,
-          linesCleared: linesCleared,
+          userScore: 0, // Provide initial values here
+          highScore: 0,
+          linesCleared: 0,
         ),
         SettingsScreen.id: (context) => const SettingsScreen(),
       },
     );
   }
 }
-

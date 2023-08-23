@@ -57,27 +57,27 @@ class _AboutState extends State<About> with SingleTickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 //logo goes here
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        width: 3,
-                        color: const Color(0xFF222831),
-                      ),
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(5),
-                      ),
-                    ),
-                    child: Hero(
-                      tag: 'logo',
-                      child: Image.asset(
-                        'images/tetris_about.gif',
-                        scale: 4.0,
-                      ),
-                    ),
-                  ),
-                ),
+                // Expanded(
+                //   child: Container(
+                //     margin: const EdgeInsets.all(20),
+                //     decoration: BoxDecoration(
+                //       border: Border.all(
+                //         width: 3,
+                //         color: const Color(0xFF222831),
+                //       ),
+                //       borderRadius: const BorderRadius.all(
+                //         Radius.circular(5),
+                //       ),
+                //     ),
+                //     child: Hero(
+                //       tag: 'logo',
+                //       child: Image.asset(
+                //         'images/tetris_about.gif',
+                //         scale: 4.0,
+                //       ),
+                //     ),
+                //   ),
+                // ),
 
                 //the about section
                 Expanded(
@@ -105,7 +105,8 @@ class _AboutState extends State<About> with SingleTickerProviderStateMixin {
                                   textStyle: const TextStyle(
                                     fontSize: 20.0,
                                     color: Colors.white,
-                                    fontFamily: 'Montserrat',
+                                    //fontFamily: 'Montserrat',
+                                    fontFamily: 'Silkscreen' ,
                                   ),
                                   speed: const Duration(milliseconds: 25),
                                 ),
@@ -122,7 +123,7 @@ class _AboutState extends State<About> with SingleTickerProviderStateMixin {
                         height: 10,
                       ),
                       const Text(
-                        'TETRIS ♥ FLUTTER',
+                        'MIGGLY ♥ MOO',
                         style: TextStyle(
                           fontFamily: 'Montserrat',
                         ),
@@ -133,7 +134,7 @@ class _AboutState extends State<About> with SingleTickerProviderStateMixin {
 
                 //footer
                 const Text(
-                  'C R E A T E D . B Y . A D I',
+                  'C R E A T E D . B Y . K Y L O',
                   style: TextStyle(
                       fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
                 ),
